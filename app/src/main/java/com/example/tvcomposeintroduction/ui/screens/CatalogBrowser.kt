@@ -82,7 +82,8 @@ private fun CategoryBrowserAppContent(featuredMovies: List<Movie>, categoryList:
     Column {
         TopNavigation(selectedTabIndex = selectedTabIndex)
         AnimatedContent(
-            targetState = selectedTabIndex.value, label = "",
+            targetState = selectedTabIndex.value,
+            label = "",
             transitionSpec = { fadeIn().togetherWith(fadeOut()) }
         ) { index ->
             when(index) {

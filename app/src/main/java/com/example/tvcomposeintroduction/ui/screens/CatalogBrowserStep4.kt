@@ -20,10 +20,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,12 +37,19 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.tv.foundation.lazy.list.TvLazyColumn
+import androidx.tv.foundation.lazy.list.TvLazyRow
+import androidx.tv.foundation.lazy.list.items
 import androidx.tv.material3.Button
+import androidx.tv.material3.CardDefaults
+import androidx.tv.material3.CardLayoutDefaults
 import androidx.tv.material3.Carousel
 import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.StandardCardLayout
 import androidx.tv.material3.Text
 import coil.compose.AsyncImage
 import com.example.tvcomposeintroduction.R
@@ -54,7 +64,19 @@ fun CatalogBrowserStep4(
     val featuredMovieList by catalogBrowserViewModel.featuredMovieList.collectAsState()
     val categoryList by catalogBrowserViewModel.categoryList.collectAsState()
 
-    FeaturedCarouselContent(featuredMovieList)
+    HomeScreenContent(featuredMovieList)
+}
+
+@Composable
+private fun HomeScreenContent(featuredMovies: List<Movie>) {
+    TvLazyColumn {
+        item {
+            FeaturedCarouselContent(featuredMovies)
+        }
+        item {
+            MoviesRowContent("Trending", featuredMovies)
+        }
+    }
 }
 
 @OptIn(ExperimentalTvMaterial3Api::class)
@@ -123,4 +145,62 @@ private fun FeaturedCarouselContent(
             }
         }
     }
+}
+
+@Composable
+private fun MoviesRowContent(
+    categoryTitle: String,
+    movies: List<Movie>
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = categoryTitle,
+            modifier = Modifier.padding(start = 20.dp, top = 20.dp),
+            style = TextStyle(fontSize = 24.sp)
+        )
+        TvLazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(30.dp),
+            contentPadding = PaddingValues(20.dp)
+        ) {
+            items(movies) {
+                MovieCard(movie = it)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalTvMaterial3Api::class)
+@Composable
+private fun MovieCard(
+    movie: Movie,
+    modifier: Modifier = Modifier,
+    onClick: (Movie) -> Unit = {}
+) {
+    StandardCardLayout(
+        modifier = modifier,
+        imageCard = {
+            CardLayoutDefaults.ImageCard(
+                onClick = { onClick(movie) },
+                interactionSource = it
+            ) {
+                AsyncImage(
+                    modifier = Modifier
+                        .width(300.dp)
+                        .aspectRatio(CardDefaults.HorizontalImageAspectRatio),
+                    model = movie.cardImageUrl,
+                    contentDescription = movie.description,
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(
+                        id = R.drawable.placeholder
+                    )
+                )
+            }
+        },
+        title = {
+            Text(
+                modifier = Modifier.padding(top = 10.dp),
+                text = movie.title
+            )
+        })
 }
